@@ -108,6 +108,7 @@ def read_gzip_file(gzip_file_path):
             # if a <DOCNO> tag is detected, docno is stored in metadata, date is extracted
             if line[0:7]=='<DOCNO>':
                 # Extracting the docno from the string
+                docno=line
                 docno  = docno[7:]
                 docno = docno[0:len(docno)-8]
                 docno = docno.strip(" ")
@@ -118,6 +119,7 @@ def read_gzip_file(gzip_file_path):
                 is_healdline = True
                 healine = headline + line
             if line[0:11]="</HEADLINE>":
+                healine = headline + line
                 is_headline = False
                 current_doc_meta_data.headline = extract_headline(headline)
                 headline = ""
@@ -127,7 +129,7 @@ def read_gzip_file(gzip_file_path):
             if line[0:5]=='</DOC>':
                 doc_counter +=1
                 save_doc(current_doc)
-                save to dictionary 1
+                save to dictionary 1, list of dictionaries
                 save to dictionary 2
                 current_doc = ""
 
