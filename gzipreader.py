@@ -1,9 +1,5 @@
-import sys, os, gzip
-"""
-    Methods to be created:
-    - Convering Document number to Date
-    - Saving Meta Data
-"""
+import gzip, re, sys, os
+
 class metadata:
     #This class stores the metadata for a given file
     # Default values are all set to -1 indicating that data is to be filled
@@ -12,30 +8,177 @@ class metadata:
     date = -1
     headline = -1
 
-def readgzip(gzfile):
-    #This method reads through the gzip file, and searches for doc tags
-    counter = 0
-    print("readgzip method started")
-    f=gzip.open(gzfile,'rb')
-    file_content=f.read()
-    print(file_content)
-    """
-    with gzip.open(gzfile,'rt') as f:
-        print(f)
-        for line in f:
-            print('got line', line)
-            #This is to prevent reading the entire file, which would be too large
-            if (counter ==100):
-                print("D")
-                break
-            counter+= 1
-    """
-    print("readgzip Method Finished")
+    def __str__(self):
+        return '<'+'internal_id'+str(self.internal_id) + 'docno'+str(self.docno) +'date'+str(self.date)+'headline'+str(self.headline)+'>'
 
+    def create_meta_data(self,meta_data_string):
+        #Extracting internal_id from saved string
+        internal_id_start = '<internal_id'
+        internal_id_end = 'docno'
+        self.internal_id = re.search('%s(.*)%s' % (internal_id_start, internal_id_end), meta_data_string).group(1)
+        #Extracting docno from saved string
+        docno_start = 'docno'
+        docno_end = 'date'
+        self.docno = re.search('%s(.*)%s' % (docno_start, docno_end), meta_data_string).group(1)
+        #Extracting date from saved string
+        date_start = 'date'
+        date_end = 'headline'
+        self.date = re.search('%s(.*)%s' % (date_start, date_end), meta_data_string).group(1)
+        #Extracting headline from saved string
+        headline_start = "headline"
+        headline_end = ">"
+        self.headline = re.search('%s(.*)%s' % (headline_start, headline_end), meta_data_string).group(1)
+        return self
 
-def convert_date(docno):
+def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
-    print('hello')
+    month = docno[2:4]
+    day = docno[4:6]
+    year = docno[6:8]
+
+    if month =='01':
+        month = "January"
+    if month =='02':
+        month = "February"
+    if month =='03':
+        month = "March"
+    if month =='04':
+        month = "April"
+    if month =='05':
+        month = "May"
+    if month =='06':
+        month = "June"
+    if month =='07':
+        month = "July"
+    if month =='08':
+        month = "August"
+    if month =='09':
+        month = "September"
+    if month =='10':
+        month = "October"
+    if month =='11':
+        month = "November"
+    if month =='12':
+        month = "December"
+    date = month + " " + day + " "+ "19"+year
+    return date
+
+def extract_headline(headline):
+    # This method extracts the headline from the given headline text
+    try:
+        substring1 = "<P>"
+        substring2 = "</P>"
+        headline = headline[(headline.index(substring1)+len(substring1)):headline.index(substring2)]
+        return str(headline)
+    except:
+        headline = ""
+        return headline
+
+def save_doc(current_doc,current_doc_meta_data,save_directory_path):
+    # This method is used to save the current document
+    date = current_doc_meta_data.date
+    save_directory_path = save_directory_path+"/"+date
+    # Search for folder based on date, if it doesn't exist, create it
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+    # Save file to preexisting or created folder
+    file_path = os.path.join(save_directory_path, str(current_doc_meta_data.internal_id) + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(current_doc)
+    current_file.close()
+
+def save_docno_to_internal_id(doc_no_to_internal_id,save_directory_path):
+    # This method is used to save the docno to internal id mapping
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+    file_path = os.path.join(save_directory_path, "doc_no_to_internal_id" + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(str(doc_no_to_internal_id))
+    current_file.close()
+
+def save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path):
+    # This method is used to sasve the internal id to metadata mapping
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+    file_path = os.path.join(save_directory_path, "internal_id_to_meta_data" + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(str(internal_id_to_meta_data))
+    current_file.close()
+
+def save_meta_data(meta_data_list,save_directory_path):
+    # This method is used to sasve the internal id to metadata mapping
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+    file_path = os.path.join(save_directory_path, "metadata" + ".txt")
+    current_file = open(file_path, "w")
+    for item in meta_data_list:
+        current_file.write(str(item))
+    current_file.close()
+
+def read_gzip_file(gzip_file_path,save_directory_path):
+    #This method reads through the gzip file, and searches for doc tags
+
+    # 'doc_counter is used to keep track of how many documents are saved'
+    doc_counter = 0
+    #opening the .gz file and reading it line by line
+    with gzip.open(gzip_file_path,'rt') as gz_file:
+        #This variable will store the current document
+        current_doc = ""
+        #This variable is used to keep track of the internal_id of each doc
+        current_doc_internal_id = 0
+        # This dictionary is used to store the relationship between internal_id and docno
+        docno_to_internal_id = {}
+        # This dictionary is used to store the relationship between internal_id and metadata
+        internal_id_to_metadata ={}
+        # Used to keep track of whether the line being read is part of the headline
+        is_headline = False
+        headline = ""
+        # Used to keep track of all metadata
+        metadata_list =[]
+        # Starting to read through the file
+        for line in gz_file:
+            # If a <DOC> tag is detected,internal_id,new meta data are initialized
+            if line[0:5]=='<DOC>':
+                current_doc_internal_id += 1
+                doc_counter += 1
+                current_doc_meta_data = metadata()
+                current_doc_meta_data.internal_id = current_doc_internal_id
+            # if a <DOCNO> tag is detected, docno is stored in metadata, date is extracted
+            if line[0:7]=='<DOCNO>':
+                # Extracting the docno from the string
+                docno=line
+                docno  = docno[7:]
+                docno = docno[0:14]
+                docno = docno.strip(" ")
+                # Saving docno and date to metadata
+                current_doc_meta_data.docno = docno
+                current_doc_meta_data.date = convert_docno_to_date(docno)
+
+            if line[0:10]=="<HEADLINE>" or is_headline == True :
+                is_headline = True
+                headline =  headline + line
+
+            if line[0:11]=="</HEADLINE>":
+                headline = headline + line
+                is_headline = False
+                current_doc_meta_data.headline = str(extract_headline(headline))
+                headline = ""
+
+            current_doc = current_doc + line
+
+            if line[0:6]=='</DOC>':
+                docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
+                internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
+                save_doc(current_doc,current_doc_meta_data,save_directory_path)
+                metadata_list.append(current_doc_meta_data)
+
+                current_doc = ""
+
+        save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
+        save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
+        save_meta_data(metadata_list,save_directory_path)
+
+    print(doc_counter)
 
 # Program Starts Here
 try:
@@ -49,14 +192,11 @@ try:
     #Checking to see if the destination directory exits, creating it if it doesn't
     if (os.path.exists(save_directory_path))==False:
         os.makedirs(save_directory_path)
-        print('directory created')
     else:
         print("Error: Direcotry Already Exists")
-
-
 
 except:
     print("No Arguements Provided. Provide Path To File And Saving Directory")
 
 #Reading from gzip'd file:
-readgzip(gzip_file)
+read_gzip_file(gzip_file_path,save_directory_path)

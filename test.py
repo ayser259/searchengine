@@ -9,7 +9,7 @@ class metadata:
     headline = -1
 
     def __str__(self):
-        return '<'+'internal_id'+internal_id + 'docno'+docno +'date'+date+'headline'+headline+'>'
+        return '<'+'internal_id'+str(self.internal_id) + 'docno'+str(self.docno) +'date'+str(self.date)+'headline'+str(self.headline)+'>'
 
     def create_meta_data(self,meta_data_string):
         #Extracting internal_id from saved string
@@ -77,19 +77,55 @@ def extract_headline(headline):
 
     return headline
 
-def save_doc(current_doc):
+def save_doc(current_doc,current_doc_meta_data,save_directory_path):
     # This method is used to save the current document
-    print('entered save_doc method')
+    print("Entered method save_doc")
+    date = current_doc_meta_data.date
+    save_directory_path = save_directory_path+"/"+date
+    # Search for folder based on date, if it doesn't exist, create it
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+        print('directory created')
+    # Save file to preexisting or created folder
+    file_path = os.path.join(save_directory_path, str(current_doc_meta_data.internal_id) + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(current_doc)
+    current_file.close()
 
-def save_docno_to_internal_id(doc_no_to_internal_id):
+def save_docno_to_internal_id(doc_no_to_internal_id,save_directory_path):
     # This method is used to save the docno to internal id mapping
-    print('entered save_docno_to_internal_id method')
+    print("Entered method save_docno_to_internal_id")
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+        print('directory created')
+    file_path = os.path.join(save_directory_path, "doc_no_to_internal_id" + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(str(doc_no_to_internal_id))
+    current_file.close()
 
-def save_internal_id_to_metadata(internal_id_to_meta_data):
+def save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path):
     # This method is used to sasve the internal id to metadata mapping
-    print('entered save_internal_if_to_metadata')
+    print("Entered method save_internal_id_to_metadata")
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+        print('directory created')
+    file_path = os.path.join(save_directory_path, "internal_id_to_meta_data" + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(str(internal_id_to_meta_data))
+    current_file.close()
 
-def read_gzip_file(gzip_file_path):
+def save_meta_data(meta_data_list,save_directory_path):
+    print("Entered method save_meta_data")
+    # This method is used to sasve the internal id to metadata mapping
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+        print('directory created')
+    file_path = os.path.join(save_directory_path, "metadata" + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(str(meta_data_list))
+    current_file.close()
+
+def read_gzip_file(gzip_file_path,save_directory_path):
     #This method reads through the gzip file, and searches for doc tags
     gzip_file_path = '/Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz'
     # 'doc_counter is used to keep track of how many documents are saved'
@@ -109,6 +145,8 @@ def read_gzip_file(gzip_file_path):
         # Used to keep track of whether the line being read is part of the headline
         is_headline = False
         headline = ""
+        # Used to keep track of all metadata
+        metadata_list =[]
         # Starting to read through the file
         for line in gz_file:
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
@@ -144,17 +182,18 @@ def read_gzip_file(gzip_file_path):
                 doc_counter +=1
                 docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
                 internal_id_to_metadata.update({current_doc_meta_data.internal_id:current_doc_meta_data})
-                save_doc(current_doc)
+                save_doc(current_doc,current_doc_meta_data,save_directory_path)
+                metadata_list.append(current_doc_meta_data)
                 current_doc = ""
 
-
-        save_docno_to_internal_id(doc_no_to_internal_id)
-        save_internal_id_to_metadata(internal_id_to_meta_data)
+        save_docno_to_internal_id(doc_no_to_internal_id,save_directory_path)
+        save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path)
+        save_meta_data(metadata_list,save_directory_path)
 
     print(doc_counter)
 
 
-read_gzip_file('/Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz')
+read_gzip_file('/Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz','latimes.gz /Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test')
 
 
 """
