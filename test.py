@@ -65,17 +65,29 @@ def convert_docno_to_date(docno):
 
 def extract_headline(headline):
     # This method extracts the headline from the given headline text
-    headline_start = '<P>'
-    headline_end = '</P>'
-    headline = re.search('%s(.*)%s' % (headline_start, headline_end), headline).group(1)
+    try:
+        headline_start = '<P>'
+        headline_end = '</P>'
+        headline = re.search('%s(.*)%s' % (headline_start, headline_end), headline).group(1)
 
-    headline = re.sub('[</P>]', '', headline)
-    headline = re.sub('[<P>]', '', headline)
+        headline = re.sub('[</P>]', '', headline)
+        headline = re.sub('[<P>]', '', headline)
+    except:
+        headline = ""
 
     return headline
 
 def save_doc(current_doc):
     # This method is used to save the current document
+    print('entered save_doc method')
+
+def save_docno_to_internal_id(doc_no_to_internal_id):
+    # This method is used to save the docno to internal id mapping
+    print('entered save_docno_to_internal_id method')
+
+def save_internal_id_to_metadata(internal_id_to_meta_data):
+    # This method is used to sasve the internal id to metadata mapping
+    print('entered save_internal_if_to_metadata')
 
 def read_gzip_file(gzip_file_path):
     #This method reads through the gzip file, and searches for doc tags
@@ -95,8 +107,8 @@ def read_gzip_file(gzip_file_path):
         #This variable is used to keep track of all of the meta data
         metadata_string = ""
         # Used to keep track of whether the line being read is part of the headline
-        is_healdline = False
-        healine = ""
+        is_headline = False
+        headline = ""
         # Starting to read through the file
         for line in gz_file:
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
@@ -112,13 +124,15 @@ def read_gzip_file(gzip_file_path):
                 docno  = docno[7:]
                 docno = docno[0:len(docno)-8]
                 docno = docno.strip(" ")
+                # Saving docno and date to metadata
                 current_doc_meta_data.docno = docno
                 current_doc_meta_data.date = convert_docno_to_date(docno)
 
-            if line[0:10]="<HEADLINE>" or is_healdine == True :
-                is_healdline = True
+            if line[0:10]=="<HEADLINE>" or is_headline == True :
+                is_headline = True
                 healine = headline + line
-            if line[0:11]="</HEADLINE>":
+
+            if line[0:11]=="</HEADLINE>":
                 healine = headline + line
                 is_headline = False
                 current_doc_meta_data.headline = extract_headline(headline)
@@ -128,19 +142,19 @@ def read_gzip_file(gzip_file_path):
 
             if line[0:5]=='</DOC>':
                 doc_counter +=1
+                docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
+                internal_id_to_metadata.update({current_doc_meta_data.internal_id:current_doc_meta_data})
                 save_doc(current_doc)
-                save to dictionary 1, list of dictionaries
-                save to dictionary 2
                 current_doc = ""
 
-            # If a new document is being read, clear out the variable saving the doc
-            if new_file = True:
-                current_doc = ""
+
+        save_docno_to_internal_id(doc_no_to_internal_id)
+        save_internal_id_to_metadata(internal_id_to_meta_data)
 
     print(doc_counter)
 
 
-readgzip('/Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz')
+read_gzip_file('/Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz')
 
 
 """
