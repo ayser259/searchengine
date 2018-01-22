@@ -1,4 +1,4 @@
-import gzip
+import gzip, re, sys, os
 
 class metadata:
     #This class stores the metadata for a given file
@@ -8,12 +8,74 @@ class metadata:
     date = -1
     headline = -1
 
+    def __str__(self):
+        return '<'+'internal_id'+internal_id + 'docno'+docno +'date'+date+'headline'+headline+'>'
+
+    def create_meta_data(self,meta_data_string):
+        #Extracting internal_id from saved string
+        internal_id_start = '<internal_id'
+        internal_id_end = 'docno'
+        self.internal_id = re.search('%s(.*)%s' % (internal_id_start, internal_id_end), meta_data_string).group(1)
+        #Extracting docno from saved string
+        docno_start = 'docno'
+        docno_end = 'date'
+        self.docno = re.search('%s(.*)%s' % (docno_start, docno_end), meta_data_string).group(1)
+        #Extracting date from saved string
+        date_start = 'date'
+        date_end = 'headline'
+        self.date = re.search('%s(.*)%s' % (date_start, date_end), meta_data_string).group(1)
+        #Extracting headline from saved string
+        headline_start = "headline"
+        headline_end = ">"
+        self.headline = re.search('%s(.*)%s' % (headline_start, headline_end), meta_data_string).group(1)
+        return self
+
 def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
-    print('hello')
-    <DOCNO> LA010189-0001 </DOCNO>
+    month = docno[2:4]
+    day = docno[4:6]
+    year = docno[6:9]
 
+    if month =='01':
+        month = "January"
+    if month =='02':
+        month = "February"
+    if month =='03':
+        month = "March"
+    if month =='04':
+        month = "April"
+    if month =='05':
+        month = "May"
+    if month =='06':
+        month = "June"
+    if month =='07':
+        month = "July"
+    if month =='08':
+        month = "August"
+    if month =='09':
+        month = "September"
+    if month =='10':
+        month = "October"
+    if month =='11':
+        month = "November"
+    if month =='12':
+        month = "December"
+    date = month + " " + day + " "+ "19"+year
+    return date
 
+def extract_headline(headline):
+    # This method extracts the headline from the given headline text
+    headline_start = '<P>'
+    headline_end = '</P>'
+    headline = re.search('%s(.*)%s' % (headline_start, headline_end), headline).group(1)
+
+    headline = re.sub('[</P>]', '', headline)
+    headline = re.sub('[<P>]', '', headline)
+
+    return headline
+
+def save_doc(current_doc):
+    # This method is used to save the current document
 
 def read_gzip_file(gzip_file_path):
     #This method reads through the gzip file, and searches for doc tags
@@ -32,6 +94,9 @@ def read_gzip_file(gzip_file_path):
         internal_id_to_meta_data ={}
         #This variable is used to keep track of all of the meta data
         metadata_string = ""
+        # Used to keep track of whether the line being read is part of the headline
+        is_healdline = False
+        healine = ""
         # Starting to read through the file
         for line in gz_file:
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
@@ -49,11 +114,21 @@ def read_gzip_file(gzip_file_path):
                 current_doc_meta_data.docno = docno
                 current_doc_meta_data.date = convert_docno_to_date(docno)
 
+            if line[0:10]="<HEADLINE>" or is_healdine == True :
+                is_healdline = True
+                healine = headline + line
+            if line[0:11]="</HEADLINE>":
+                is_headline = False
+                current_doc_meta_data.headline = extract_headline(headline)
+                headline = ""
+
             current_doc = current_doc + line
 
             if line[0:5]=='</DOC>':
                 doc_counter +=1
                 save_doc(current_doc)
+                save to dictionary 1
+                save to dictionary 2
                 current_doc = ""
 
             # If a new document is being read, clear out the variable saving the doc
