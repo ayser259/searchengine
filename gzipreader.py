@@ -32,6 +32,7 @@ class metadata:
         return self
 def gzip_reader_error():
     print("There has been an error with your request")
+    print("Please ensure that the path for the both the gzip file and the saving directory is accurate. ")
     print("This program is run from the command line and accepts two arguements in specific formats")
     print("They are as follows: ")
     print("1. The gziped file that is to be read. The full path to the file should be provided. For example: ")

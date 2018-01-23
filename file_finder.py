@@ -35,6 +35,8 @@ class metadata:
         return self
 def file_finder_error():
     print("There is an error with the format of the input")
+    print("please ensure the data input is accurate")
+    print("If no data is returned, and the input data is correct, no files exist attached to that input")
     print("The command line arguements accepts three arguements, they are as follows:")
     print("1. The path to the folder where the files are stored. ")
     print("example: /Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test ")
