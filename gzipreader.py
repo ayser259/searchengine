@@ -13,21 +13,22 @@ class metadata:
 
     def create_meta_data(self,meta_data_string):
         #Extracting internal_id from saved string
-        internal_id_start = '<internal_id'
-        internal_id_end = 'docno'
-        self.internal_id = re.search('%s(.*)%s' % (internal_id_start, internal_id_end), meta_data_string).group(1)
+        substring1 = '<internal_id'
+        substring2 = 'docno'
+        self.internal_id = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
         #Extracting docno from saved string
-        docno_start = 'docno'
-        docno_end = 'date'
-        self.docno = re.search('%s(.*)%s' % (docno_start, docno_end), meta_data_string).group(1)
+        substring1 = 'docno'
+        substring2 = 'date'
+        self.docno = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
         #Extracting date from saved string
-        date_start = 'date'
-        date_end = 'headline'
-        self.date = re.search('%s(.*)%s' % (date_start, date_end), meta_data_string).group(1)
+        substring1 = 'date'
+        substring2 = 'headline'
+        self.date = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
         #Extracting headline from saved string
-        headline_start = "headline"
-        headline_end = ">"
-        self.headline = re.search('%s(.*)%s' % (headline_start, headline_end), meta_data_string).group(1)
+        substring1 = "headline"
+        substring2 = ">"
+        self.headline = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
+
         return self
 
 def convert_docno_to_date(docno):
@@ -117,7 +118,6 @@ def save_meta_data(meta_data_list,save_directory_path):
 
 def read_gzip_file(gzip_file_path,save_directory_path):
     #This method reads through the gzip file, and searches for doc tags
-
     # 'doc_counter is used to keep track of how many documents are saved'
     doc_counter = 0
     #opening the .gz file and reading it line by line
@@ -153,33 +153,30 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 # Saving docno and date to metadata
                 current_doc_meta_data.docno = docno
                 current_doc_meta_data.date = convert_docno_to_date(docno)
-
+            # Storing headline values within a singular value
             if line[0:10]=="<HEADLINE>" or is_headline == True :
                 is_headline = True
                 headline =  headline + line
-
+            # Extracting headlines, which are a multline value
             if line[0:11]=="</HEADLINE>":
                 headline = headline + line
                 is_headline = False
                 current_doc_meta_data.headline = str(extract_headline(headline))
                 headline = ""
-
+            # Storing all the relevant lines for a document within a variable
             current_doc = current_doc + line
-
+            # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
                 docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
                 internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
                 save_doc(current_doc,current_doc_meta_data,save_directory_path)
                 metadata_list.append(current_doc_meta_data)
-
                 current_doc = ""
-
+        # Saving dictionaries and metadata to file
         save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
         save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
         save_meta_data(metadata_list,save_directory_path)
-
     print(doc_counter)
-
 # Program Starts Here
 try:
     # Retrieving arguments from command line
@@ -188,15 +185,12 @@ try:
     save_directory_path = directory_list[2]
     print(gzip_file_path)
     print(save_directory_path)
-
     #Checking to see if the destination directory exits, creating it if it doesn't
     if (os.path.exists(save_directory_path))==False:
         os.makedirs(save_directory_path)
     else:
         print("Error: Direcotry Already Exists")
-
+    #Reading from gzip'd file:
+    read_gzip_file(gzip_file_path,save_directory_path)
 except:
     print("No Arguements Provided. Provide Path To File And Saving Directory")
-
-#Reading from gzip'd file:
-read_gzip_file(gzip_file_path,save_directory_path)
