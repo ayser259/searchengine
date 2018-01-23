@@ -30,6 +30,15 @@ class metadata:
         self.headline = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
 
         return self
+def gzip_reader_error():
+    print("There has been an error with your request")
+    print("This program is run from the command line and accepts two arguements in specific formats")
+    print("They are as follows: ")
+    print("1. The gziped file that is to be read. The full path to the file should be provided. For example: ")
+    print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz")
+    print("2. The destination directory shoudl not exist and should be provided in the following format, such that the folder 'test' does not exist:")
+    print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test")
+
 
 def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
