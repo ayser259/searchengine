@@ -1,35 +1,7 @@
-import gzip, re, sys, os
+import gzip, re, sys, os,time
+from metadata import *
 
-class metadata:
-    #This class stores the metadata for a given file
-    # Default values are all set to -1 indicating that data is to be filled
-    internal_id = -1
-    docno = -1
-    date = -1
-    headline = -1
 
-    def __str__(self):
-        return '<'+'internal_id'+str(self.internal_id) + 'docno'+str(self.docno) +'date'+str(self.date)+'headline'+str(self.headline)+'>'
-
-    def create_meta_data(self,meta_data_string):
-        #Extracting internal_id from saved string
-        substring1 = '<internal_id'
-        substring2 = 'docno'
-        self.internal_id = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
-        #Extracting docno from saved string
-        substring1 = 'docno'
-        substring2 = 'date'
-        self.docno = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
-        #Extracting date from saved string
-        substring1 = 'date'
-        substring2 = 'headline'
-        self.date = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
-        #Extracting headline from saved string
-        substring1 = "headline"
-        substring2 = ">"
-        self.headline = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
-
-        return self
 def gzip_reader_error():
     print("There has been an error with your request")
     print("Please ensure that the path for the both the gzip file and the saving directory is accurate. ")
@@ -39,7 +11,7 @@ def gzip_reader_error():
     print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/Assignments/Data/latimes.gz")
     print("2. The destination directory shoudl not exist and should be provided in the following format, such that the folder 'test' does not exist:")
     print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test")
-
+    sys.exit()
 
 def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
@@ -186,21 +158,26 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
         save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
         save_meta_data(metadata_list,save_directory_path)
-    print(doc_counter)
+    print(str(doc_counter)+" documents located, processed, and saved.")
+
 # Program Starts Here
 try:
     # Retrieving arguments from command line
+    t = time.time()
     directory_list = sys.argv
     gzip_file_path = directory_list[1]
     save_directory_path = directory_list[2]
-    print(gzip_file_path)
-    print(save_directory_path)
     #Checking to see if the destination directory exits, creating it if it doesn't
     if (os.path.exists(save_directory_path))==False:
         os.makedirs(save_directory_path)
     else:
         print("Error: Direcotry Already Exists")
+        sys.exit()
     #Reading from gzip'd file:
     read_gzip_file(gzip_file_path,save_directory_path)
+    a = time.time()
+    total = a-t
+    print("Program ran in approximately "+str(total)+" seconds.")
 except:
-    print("No Arguements Provided. Provide Path To File And Saving Directory")
+    gzip_reader_error()
+    sys.exit()
