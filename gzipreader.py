@@ -12,6 +12,7 @@ def gzip_reader_error():
     print("2. The destination directory shoudl not exist and should be provided in the following format, such that the folder 'test' does not exist:")
     print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test")
     sys.exit()
+    print("test")
 
 def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
