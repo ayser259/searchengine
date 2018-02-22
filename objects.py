@@ -5,6 +5,7 @@ class metadata:
     docno = -1
     date = -1
     headline = -1
+    
 
     def __str__(self):
         return '<'+'internal_id'+str(self.internal_id) + 'docno'+str(self.docno) +'date'+str(self.date)+'headline'+str(self.headline)+'>'
