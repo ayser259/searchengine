@@ -1,6 +1,7 @@
 # This file holds all the helper methods for the 'gzip_reader_methods.py' file
-import gzip, re, sys, os, time
+import gzip, re, sys, os,json
 from objects import *
+import lexicon_engine as lexicon_engine
 
 def gzip_reader_error():
     print("There has been an error with your request")
@@ -104,22 +105,16 @@ def read_gzip_file(gzip_file_path,save_directory_path):
     doc_counter = 0
     #opening the .gz file and reading it line by line
 # Assignment_2_start_a
-        # the following dictionary holds the dictionary for term_id to term_list
-        # {'term_id':'List of term_details object'}
-    postings_dict = {}
-        # the following dictionary holds the {'term':'term_id'} dictionary
-    term_to_term_id = {}
-        # the following dictionary holds the {'term_id':'term'} dictionary
-    term_id_to_term = {}
+    # This string is used to store tokenizable string, not full document
+    token_string = ""
+    # This boolean value keeps track of whether or not we are reading valid tokens
+    is_token_tag = False
+    # This dictionary is part_1 of lexicon: token --> token_ids
+    tokens_to_id = {}
+    # This dictionary is the inverted index
+    inverted_index = {}
 # Assignment_2_end_a
     with open(gzip_file_path, "r") as gz_file:
-# Assignment_2_start_b
-        # This string is used to store tokenizable string, not full document
-        token_string = ""
-        # This boolean value keeps track of whether or not we are reading valid tokens
-        is_token_tag = False
-# Assignment_2_end_b
-
         #This variable will store the current document
         current_doc = ""
         #This variable is used to keep track of the internal_id of each doc
@@ -134,15 +129,25 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         # Used to keep track of all metadata
         metadata_list =[]
         # Starting to read through the file
+# Assignment_2_start_a
+        # This string is used to store tokenizable string, not full document
+        token_string = ""
+        # This boolean value keeps track of whether or not we are reading valid tokens
+        is_token_tag = False
+        # This dictionary is part_1 of lexicon: token --> token_ids
+        tokens_to_id = {}
+        # This dictionary is the inverted index
+        inverted_index = {}
+# Assignment_2_end_a
         for line in gz_file:
-# Assignment_2_start_c
+# Assignment_2_start_b
             if (line[0:6] =='<TEXT>') or (line[0:10] =='<HEADLINE>') or (line[0:0] =='<GRAPHIC>'):
                 is_token_tag = True
             elif line[0:7] =='</TEXT>' or line[0:11] =='</HEADLINE>' or (line[0:10] =='</GRAPHIC>'):
                 is_token_tag = False
             if is_token_tag == True:
-                token_string = inverter.token_string_maker(line,token_string)
-# Assignment_2_end_c
+                token_string = lexicon_engine.token_string_maker(line,token_string)
+# Assignment_2_end_b
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
             if line[0:5]=='<DOC>':
                 current_doc_internal_id += 1
@@ -153,7 +158,7 @@ def read_gzip_file(gzip_file_path,save_directory_path):
             if line[0:7]=='<DOCNO>':
                 # Extracting the docno from the string
                 docno = line
-                docno  = docno[7:]
+                docno = docno[7:]
                 docno = docno[0:14]
                 docno = docno.strip(" ")
                 # Saving docno and date to metadata
@@ -173,43 +178,34 @@ def read_gzip_file(gzip_file_path,save_directory_path):
             current_doc = current_doc + line
             # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
-# Assignment_2_start_d
-                #return_set = inverter.terminze(current_doc_meta_data.internal_id,token_string,term_id_to_term,term_to_term_id,postings_dict)
-                return_set = inverter.term_collector(current_doc_meta_data.internal_id,token_string,term_id_to_term,term_to_term_id,postings_dict)
-                print("method successful")
-                token_list = return_set.get('token_list')
-                term_to_term_id = return_set.get('term_to_term_id')
-                term_id_to_term = return_set.get('term_id_to_term')
-                posting_list = return_set.get('postings_dict')
-                current_doc_meta_data.doc_length = (len(token_list)+1)
-# Assignment_2_end_d
+# Assignment_2_start_c
+                tokens = lexicon_engine.tokenize(current_doc)
+                token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
+                word_count = lexicon_engine.count_words(token_ids)
+                lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
+                current_doc_meta_data.doc_length = len(token_ids)
+# Assignment_2_end_c
                 docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
                 internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
                 save_doc(current_doc,current_doc_meta_data,save_directory_path)
                 metadata_list.append(current_doc_meta_data)
                 current_doc = ""
-                token_string = ""
-                is_token_tag = False
-                headline  = ""
-
-
-
         # Saving dictionaries and metadata to file
+# Assignment_2_start_d
+        id_to_tokens = lexicon_engine.convert_ids_to_tokens(tokens_to_id)
+        lexicon_engine.save_tokens_to_id(tokens_to_id,save_directory_path)
+        lexicon_engine.save_id_to_tokens(id_to_tokens,save_directory_path)
+        lexicon_engine.save_inverted_index(inverted_index,save_directory_path)
+# Assignment_2_end_d
         save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
         save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
         save_meta_data(metadata_list,save_directory_path)
-        save_lexicon_files(save_directory_path,term_id_to_term,term_to_term_id)
-        save_postings_files(save_directory_path,posting_list)
-    print(str(doc_counter)+" documents located, processed, and saved.")
-© 2018 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-API
-Training
-Shop
-Blog
-About
+        print(str(doc_counter)+" documents located, processed, and saved.")
+        print(str(type(inverted_index)))
+# Testing Reading files
+        test_tokens_to_id = lexicon_engine.read_tokens_to_id(save_directory_path)
+        test_id_to_tokens = lexicon_engine.read_id_to_tokens(save_directory_path)
+        test_inverted_index = lexicon_engine.read_inverted_index(save_directory_path)
+        print(test_inverted_index)
+        #print(type(test_inverted_index))
+        print("Done")

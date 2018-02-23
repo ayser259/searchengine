@@ -130,7 +130,7 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         inverted_index = {}
 # Assignment_2_end_a
         for line in gz_file:
-# Assignment_2_start_
+# Assignment_2_start_b
             if (line[0:6] =='<TEXT>') or (line[0:10] =='<HEADLINE>') or (line[0:0] =='<GRAPHIC>'):
                 is_token_tag = True
             elif line[0:7] =='</TEXT>' or line[0:11] =='</HEADLINE>' or (line[0:10] =='</GRAPHIC>'):
@@ -172,7 +172,7 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 tokens = lexicon_engine.tokenize(current_doc)
                 token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
                 word_count = lexicon_engine.count_words(token_ids)
-                lexicon_engine.add_to_postings(word_count,doc_id,inverted_index)
+                lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
 # Assignment_2_end_c
                 docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
                 internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
@@ -182,6 +182,9 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         # Saving dictionaries and metadata to file
 # Assignment_2_start_d
         id_to_tokens = lexicon_engine.convert_ids_to_tokens(tokens_to_id)
+        save_tokens_to_id(tokens_to_id,save_directory_path)
+        save_id_to_tokens(id_to_tokens,save_directory_path)
+        save_inverted_index(inverted_index,save_directory_path)
 # Assignment_2_end_d
         save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
         save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)

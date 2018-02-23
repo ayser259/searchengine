@@ -1,8 +1,9 @@
 
 import gzip, re, sys, os,time
 from objects import *
-import test_text_methods as reader
-import in_memory_inversion as inverter
+from test_text_methods import *
+
+
 """
 This file is the program & read gziped files and process them as instructed
 This method uses the following methods and classes from other files:
@@ -25,10 +26,10 @@ try:
         print("Error: Direcotry Already Exists")
         sys.exit()
     #Reading from gzip'd file:
-    reader.read_gzip_file(gzip_file_path,save_directory_path)
+    read_gzip_file(gzip_file_path,save_directory_path)
     a = time.time()
     total = a-t
     print("Program ran in approximately "+str(total)+" seconds.")
 except:
-    reader.gzip_reader_error()
+    gzip_reader_error()
     sys.exit()
