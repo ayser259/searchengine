@@ -26,16 +26,11 @@ def tokenize(doc_string):
 def convert_tokens_to_ids(tokens,tokens_to_id):
     # This method returns a list of token_ids
     token_ids = []
-    existing_tokens = list(tokens_to_id.keys())
     for token in tokens:
-        if token in existing_tokens:
+        if tokens_to_id.__contains__(token):
             token_ids.append(tokens_to_id[token])
         else:
-            if len(existing_tokens)>0:
-                existing_tokens.append(token)
-            else:
-                existing_tokens = [token]
-            token_id = len(existing_tokens)
+            token_id = len(list(tokens_to_id.keys()))
             token_ids.append(token_id)
             tokens_to_id[token] = token_id
     return token_ids
@@ -44,7 +39,7 @@ def count_words(token_ids):
     # This method returns a dictionary of {term_id:count}
     word_counts = {}
     for token_id in token_ids:
-        if token_id in word_counts.keys():
+        if word_counts.__contains__(token_id):
             word_counts[token_id] = word_counts[token_id] +1
         else:
             word_counts[token_id] =1
@@ -54,7 +49,7 @@ def add_to_postings(word_count,doc_id,inverted_index):
     # This method returns the inverted_index
     for term_id in word_count:
         count = word_count[term_id]
-        if term_id in inverted_index.keys():
+        if inverted_index.__contains__(term_id):
             postings = inverted_index[term_id]
         else:
             postings = []
@@ -170,23 +165,3 @@ def read_inverted_index(read_directory_path):
         current_dict[key] = postings_list
     return current_dict
 # Assignment_2_end_d
-
-
-def save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path):
-    # This method is used to sasve the internal id to metadata mapping
-    if (os.path.exists(save_directory_path)) == False:
-        os.makedirs(save_directory_path)
-    file_path = os.path.join(save_directory_path, "internal_id_to_meta_data" + ".txt")
-    current_file = open(file_path, "w")
-    current_file.write(str(internal_id_to_meta_data))
-    current_file.close()
-
-def save_meta_data(meta_data_list,save_directory_path):
-    # This method is used to sasve the internal id to metadata mapping
-    if (os.path.exists(save_directory_path)) == False:
-        os.makedirs(save_directory_path)
-    file_path = os.path.join(save_directory_path, "metadata" + ".txt")
-    current_file = open(file_path, "w")
-    for item in meta_data_list:
-        current_file.write(str(item))
-    current_file.close()

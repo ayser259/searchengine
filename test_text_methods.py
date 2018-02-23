@@ -120,6 +120,7 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         #This variable is used to keep track of the internal_id of each doc
         current_doc_internal_id = 0
         # This dictionary is used to store the relationship between internal_id and docno
+        '''
         docno_to_internal_id = {}
         # This dictionary is used to store the relationship between internal_id and metadata
         internal_id_to_metadata ={}
@@ -129,6 +130,7 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         # Used to keep track of all metadata
         metadata_list =[]
         # Starting to read through the file
+        '''
 # Assignment_2_start_a
         # This string is used to store tokenizable string, not full document
         token_string = ""
@@ -138,15 +140,19 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         tokens_to_id = {}
         # This dictionary is the inverted index
         inverted_index = {}
+
 # Assignment_2_end_a
         for line in gz_file:
+
 # Assignment_2_start_b
+
             if (line[0:6] =='<TEXT>') or (line[0:10] =='<HEADLINE>') or (line[0:0] =='<GRAPHIC>'):
                 is_token_tag = True
             elif line[0:7] =='</TEXT>' or line[0:11] =='</HEADLINE>' or (line[0:10] =='</GRAPHIC>'):
                 is_token_tag = False
             if is_token_tag == True:
                 token_string = lexicon_engine.token_string_maker(line,token_string)
+
 # Assignment_2_end_b
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
             if line[0:5]=='<DOC>':
@@ -165,47 +171,47 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 current_doc_meta_data.docno = docno
                 current_doc_meta_data.date = convert_docno_to_date(docno)
             # Storing headline values within a singular value
+            '''
             if line[0:10]=="<HEADLINE>" or is_headline == True :
                 is_headline = True
                 headline =  headline + line
+
             # Extracting headlines, which are a multline value
             if line[0:11]=="</HEADLINE>":
                 headline = headline + line
                 is_headline = False
                 current_doc_meta_data.headline = str(extract_headline(headline))
                 headline = ""
+            '''
             # Storing all the relevant lines for a document within a variable
             current_doc = current_doc + line
             # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
 # Assignment_2_start_c
+
                 tokens = lexicon_engine.tokenize(current_doc)
                 token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
                 word_count = lexicon_engine.count_words(token_ids)
                 lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
                 current_doc_meta_data.doc_length = len(token_ids)
+
 # Assignment_2_end_c
-                docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
-                internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
-                save_doc(current_doc,current_doc_meta_data,save_directory_path)
-                metadata_list.append(current_doc_meta_data)
+                #docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
+                #internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
+                #save_doc(current_doc,current_doc_meta_data,save_directory_path)
+                #metadata_list.append(current_doc_meta_data)
                 current_doc = ""
         # Saving dictionaries and metadata to file
 # Assignment_2_start_d
+
         id_to_tokens = lexicon_engine.convert_ids_to_tokens(tokens_to_id)
         lexicon_engine.save_tokens_to_id(tokens_to_id,save_directory_path)
         lexicon_engine.save_id_to_tokens(id_to_tokens,save_directory_path)
         lexicon_engine.save_inverted_index(inverted_index,save_directory_path)
+
 # Assignment_2_end_d
-        save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
-        save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
-        save_meta_data(metadata_list,save_directory_path)
+        #save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
+        #save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
+        #save_meta_data(metadata_list,save_directory_path)
         print(str(doc_counter)+" documents located, processed, and saved.")
-        print(str(type(inverted_index)))
-# Testing Reading files
-        test_tokens_to_id = lexicon_engine.read_tokens_to_id(save_directory_path)
-        test_id_to_tokens = lexicon_engine.read_id_to_tokens(save_directory_path)
-        test_inverted_index = lexicon_engine.read_inverted_index(save_directory_path)
-        print(test_inverted_index)
-        #print(type(test_inverted_index))
-        print("Done")
+        print(doc_counter)
