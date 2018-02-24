@@ -27,9 +27,9 @@ def convert_tokens_to_ids(tokens,tokens_to_id):
     # This method returns a list of token_ids
     token_ids = []
     for token in tokens:
-        if tokens_to_id.__contains__(token):
+        try:
             token_ids.append(tokens_to_id[token])
-        else:
+        except:
             token_id = len(list(tokens_to_id.keys()))
             token_ids.append(token_id)
             tokens_to_id[token] = token_id
@@ -39,19 +39,21 @@ def count_words(token_ids):
     # This method returns a dictionary of {term_id:count}
     word_counts = {}
     for token_id in token_ids:
-        if word_counts.__contains__(token_id):
-            word_counts[token_id] = word_counts[token_id] +1
-        else:
-            word_counts[token_id] =1
+        try:
+            dict_item = {token_id:word_counts[token_id] +1}
+            word_counts.update(dict_item)
+        except:
+            dict_item = {token_id:1}
+            word_counts.update(dict_item)
     return word_counts
 
 def add_to_postings(word_count,doc_id,inverted_index):
     # This method returns the inverted_index
     for term_id in word_count:
         count = word_count[term_id]
-        if inverted_index.__contains__(term_id):
+        try:
             postings = inverted_index[term_id]
-        else:
+        except:
             postings = []
         posting = {doc_id:count}
         postings.append(posting)
