@@ -1,5 +1,5 @@
-# This file holds all the helper methods for the 'gzip_reader_methods.py'
-import gzip, re, sys, os, time
+# This file holds all the helper methods for the 'gzip_reader_methods.py' file
+import gzip, re, sys, os,json, time
 from objects import *
 import lexicon_engine as lexicon_engine
 
@@ -120,7 +120,6 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         #This variable is used to keep track of the internal_id of each doc
         current_doc_internal_id = 0
         # This dictionary is used to store the relationship between internal_id and docno
-        '''
         docno_to_internal_id = {}
         # This dictionary is used to store the relationship between internal_id and metadata
         internal_id_to_metadata ={}
@@ -130,7 +129,6 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         # Used to keep track of all metadata
         metadata_list =[]
         # Starting to read through the file
-        '''
 # Assignment_2_start_a
         # This string is used to store tokenizable string, not full document
         token_string = ""
@@ -140,7 +138,6 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         tokens_to_id = {}
         # This dictionary is the inverted index
         inverted_index = {}
-
         t = time.time()
 # Assignment_2_end_a
         for line in gz_file:
@@ -153,17 +150,14 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 is_token_tag = False
             if is_token_tag == True:
                 token_string = lexicon_engine.token_string_maker(line,token_string)
-
 # Assignment_2_end_b
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
             if line[0:5]=='<DOC>':
                 current_doc_internal_id += 1
                 doc_counter += 1
-                '''
                 current_doc_meta_data = metadata()
                 current_doc_meta_data.internal_id = current_doc_internal_id
             # if a <DOCNO> tag is detected, docno is stored in metadata, date is extracted
-
             if line[0:7]=='<DOCNO>':
                 # Extracting the docno from the string
                 docno = line
@@ -185,43 +179,38 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 is_headline = False
                 current_doc_meta_data.headline = str(extract_headline(headline))
                 headline = ""
-            '''
             # Storing all the relevant lines for a document within a variable
             current_doc = current_doc + line
             # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
 # Assignment_2_start_c
-                #tokens = lexicon_engine.tokenize(current_doc)
-                #token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
-                #word_count = lexicon_engine.count_words(token_ids)
-                #lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
-                #current_doc_meta_data.doc_length = len(token_ids)
+
+                tokens = lexicon_engine.tokenize(current_doc)
+                token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
+                word_count = lexicon_engine.count_words(token_ids)
+                lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
+                current_doc_meta_data.doc_length = len(token_ids)
+
+# Assignment_2_end_c
+                docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
+                internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
+                save_doc(current_doc,current_doc_meta_data,save_directory_path)
+                metadata_list.append(current_doc_meta_data)
+                current_doc = ""
+                token_string = ""
                 tokens = ""
                 token_ids =""
-                word_count = ""
-                if (doc_counter%1000)==0:
-                    print(doc_counter)
-                    a = time.time()
-                    total = a-t
-                    print("Time: "+str(total))
-                    t = time.time()
-# Assignment_2_end_c
-                #docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
-                #internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})
-                #save_doc(current_doc,current_doc_meta_data,save_directory_path)
-                #metadata_list.append(current_doc_meta_data)
-                current_doc = ""
         # Saving dictionaries and metadata to file
 # Assignment_2_start_d
-        '''
+
         id_to_tokens = lexicon_engine.convert_ids_to_tokens(tokens_to_id)
         lexicon_engine.save_tokens_to_id(tokens_to_id,save_directory_path)
         lexicon_engine.save_id_to_tokens(id_to_tokens,save_directory_path)
         lexicon_engine.save_inverted_index(inverted_index,save_directory_path)
-        '''
+
 # Assignment_2_end_d
-        #save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
-        #save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
-        #save_meta_data(metadata_list,save_directory_path)
+        save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
+        save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
+        save_meta_data(metadata_list,save_directory_path)
         print(str(doc_counter)+" documents located, processed, and saved.")
         print(doc_counter)
