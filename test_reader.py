@@ -1,5 +1,17 @@
+
 import gzip, re, sys, os,time
-from indexengine import *
+from objects import *
+from test_text_methods import *
+
+
+"""
+This file is the program & read gziped files and process them as instructed
+This method uses the following methods and classes from other files:
+- Objects:
+    1) metadata from objects.py
+    2) gzip_reader_methods.py to open, read and save files
+"""
+
 # Program Starts Here
 try:
     # Retrieving arguments from command line
