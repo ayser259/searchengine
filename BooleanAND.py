@@ -1,5 +1,5 @@
 import lexicon_engine as lexicon_engine
-import ast,sys,os,json, time
+import ast,sys,os,json, time, re
 from objects import *
 
 a = time.time()
@@ -55,7 +55,7 @@ for line in query_doc:
         add_dict = False
     except:
         query_string = str(line)
-        query_list = list(query_string.split())
+        query_list = re.sub("[^\w]", " ",  query_string).split()
         for item in query_list:
             if item.isalnum()==False:
                 query_list.remove(item)
@@ -63,11 +63,13 @@ for line in query_doc:
     if add_dict:
         query_dict[query_id]=query_list
 
-# This segment of the code will return a query_id_to_valid_terms[query_id]=valid_term_list
+# This segment of the code will return a query_id_to_valid_docs[query_id]=valid_doc_list
 # This will return all the valid docs for every query
 query_id_to_valid_docs = {}
-for query_id in query_dict:
+query_numbers = list(query_dict.keys())
+for query_id in query_numbers:
     query_list = query_dict[query_id]
+    print(query_list)
     valid_doc_list = []
     no_of_queries = len(query_list)
     query_counter = {} # {doc_id:count_of_term_id_in_current_loop}
