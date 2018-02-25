@@ -31,5 +31,4 @@ class metadata:
         substring1 = "doc_length"
         substring2 = ">"
         self.doc_length = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
-
         return self

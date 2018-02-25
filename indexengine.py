@@ -1,5 +1,5 @@
 # This file holds all the helper methods for the 'gzip_reader_methods.py' file
-import gzip, re, sys, os,json, time
+import gzip, re, sys, os,json
 from objects import *
 import lexicon_engine as lexicon_engine
 
@@ -104,16 +104,6 @@ def read_gzip_file(gzip_file_path,save_directory_path):
     # 'doc_counter is used to keep track of how many documents are saved'
     doc_counter = 0
     #opening the .gz file and reading it line by line
-# Assignment_2_start_a
-    # This string is used to store tokenizable string, not full document
-    token_string = ""
-    # This boolean value keeps track of whether or not we are reading valid tokens
-    is_token_tag = False
-    # This dictionary is part_1 of lexicon: token --> token_ids
-    tokens_to_id = {}
-    # This dictionary is the inverted index
-    inverted_index = {}
-# Assignment_2_end_a
     with gzip.open(gzip_file_path,'rt') as gz_file:
         #This variable will store the current document
         current_doc = ""
@@ -138,12 +128,11 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         tokens_to_id = {}
         # This dictionary is the inverted index
         inverted_index = {}
-        t = time.time()
 # Assignment_2_end_a
         for line in gz_file:
 
 # Assignment_2_start_b
-
+# The following code is used to extract the part of the document that should be within the tokens
             if (line[0:6] =='<TEXT>') or (line[0:10] =='<HEADLINE>') or (line[0:0] =='<GRAPHIC>'):
                 is_token_tag = True
             elif line[0:7] =='</TEXT>' or line[0:11] =='</HEADLINE>' or (line[0:10] =='</GRAPHIC>'):
@@ -184,7 +173,8 @@ def read_gzip_file(gzip_file_path,save_directory_path):
             # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
 # Assignment_2_start_c
-
+                # the following code calls on the lexicon_engine to create the lexion and inverted_index
+                is_token_tag = False
                 tokens = lexicon_engine.tokenize(current_doc)
                 token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
                 word_count = lexicon_engine.count_words(token_ids)
@@ -202,15 +192,13 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 token_ids =""
         # Saving dictionaries and metadata to file
 # Assignment_2_start_d
-
+        # The following code calls on the lexicon_engine to write the dictionaries to the disk
         id_to_tokens = lexicon_engine.convert_ids_to_tokens(tokens_to_id)
         lexicon_engine.save_tokens_to_id(tokens_to_id,save_directory_path)
         lexicon_engine.save_id_to_tokens(id_to_tokens,save_directory_path)
         lexicon_engine.save_inverted_index(inverted_index,save_directory_path)
-
 # Assignment_2_end_d
         save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
         save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
         save_meta_data(metadata_list,save_directory_path)
         print(str(doc_counter)+" documents located, processed, and saved.")
-        print(doc_counter)

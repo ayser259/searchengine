@@ -32,6 +32,7 @@ try:
     docno_to_internal_id_file_path = read_directory_path+"/"+"doc_no_to_internal_id.txt"
     docno_to_internal_id_file  = open(docno_to_internal_id_file_path, "r")
     doc_no_to_internal_id_string = ""
+
     for line in docno_to_internal_id_file:
         doc_no_to_internal_id_string = doc_no_to_internal_id_string +line
     json_as_string = doc_no_to_internal_id_string.replace("'", "\"")

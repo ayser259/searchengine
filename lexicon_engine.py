@@ -1,6 +1,7 @@
 # This method holds all the helper methods for assignment 2, pertaining to in-memory inverstion
 import os,json,ast
 def token_string_maker(line,token_string):
+    # This method "cleans" the token string and removes html tags
     if line[0:3]!='<P>' and line[0:4] !='</P>' and (line[0:6] !='<TEXT>') and (line[0:10] !='<HEADLINE>') and (line[0:0] !='<GRAPHIC>'):
         token_string = token_string + line
     return token_string
@@ -129,7 +130,6 @@ def read_inverted_index(read_directory_path):
     current_dict = {}
     for line in current_file:
         dict_string = dict_string +line
-    print("A")
     i =0
     substring1 = '<'
     substring2 = '$'
@@ -164,6 +164,5 @@ def read_inverted_index(read_directory_path):
         i =dict_string.index(">")+1
         dict_string = dict_string[i:]
         i = 0
-        current_dict[key] = postings_list
+        current_dict[int(key)] = list(postings_list)
     return current_dict
-# Assignment_2_end_d
