@@ -3,7 +3,7 @@
 # Next, the program will use the given prompts to find the requested file
 # Finally, the program will read the file, and print it out
 import sys, os,json,ast
-from metadata import *
+from objects import *
 
 def file_finder_error():
     print("There is an error with the format of the input")
