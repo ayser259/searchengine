@@ -32,3 +32,14 @@ class metadata:
         substring2 = ">"
         self.doc_length = meta_data_string[(meta_data_string.index(substring1)+len(substring1)):meta_data_string.index(substring2)]
         return self
+
+class results:
+    # This object stores the qrel data
+    query_id = -1
+    student_tag = ""
+    docno = ""
+    rank = -1
+    score = -1
+
+    def __str__(self):
+        return "< student_tag: "+self.student_tag +' query_id: '+ str(self.query_id)+ " docno: "+self.docno + " score: " + str(self.score) +" rank: "+str(self.rank) + ">"
