@@ -50,8 +50,6 @@ try:
     if(id_type == 'docno'):
         docno = input_list[3]
         docno = docno.strip(" ")
-        print(len(docno))
-        print(docno)
         if(len(docno)==13):
             print('b')
             file_internal_id = doc_no_to_internal_id.get(docno)

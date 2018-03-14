@@ -10,12 +10,15 @@ This program ouputs saves to the save_directory:
 '''
 import ast,sys,os,json, time, re
 from objects import *
+from evaluation_measures import *
+
 a = time.time()
 # Reading arguments presented from input
 input_list = sys.argv
 qrels_file = input_list[1]
 results_files = input_list[2]
 save_directory_path = input_list[3]
+read_directory_path = input_list[4]
 
 # This portion of the code stores the qrels files as a dictionary with lists of relvancy
 # we only need to keep track of the relvant documents, if not in dict, not relevant
@@ -36,8 +39,7 @@ try:
                         qrel_list = qrel_index[query_id]
                     except:
                         qrel_list =[]
-                    qrel = {docno:relevance}
-                    qrel_list.append(qrel)
+                    qrel_list.append(docno)
                     qrel_index[query_id] = qrel_list
     qrels_file.close()
 except:
@@ -72,115 +74,34 @@ try:
                                 result_list.append(result)
                             except:
                                 print(student_tag+"'s results file is incorrectly formatted'")
-                    print(filename)
                     results_dict[student_tag] = result_list
-                    average_precision_dict = average_precision(results_list,qrel_index)
-                    precision_at_10_dict = precision_at_10(results_list,qrel_index)
-                    ndcg_at_10_dict = ndcg_at_10(results_list,qrel_index)
-                    ndcg_at_1000_dict = ndcg_at_1000(results_list,qrel_index)
-                    time_based_gain_dict = time_based_gain(results_list,qrel_index)
-                    save_files()
-                    # Now we need to run the evaluations on the
+    try:
+        # Loading all relevant files:
+        # Loading metadata string
+        # Loading docno to internal id mapping
+        docno_to_internal_id_file_path = read_directory_path+"/"+"doc_no_to_internal_id.txt"
+        docno_to_internal_id_file  = open(docno_to_internal_id_file_path, "r")
+        doc_no_to_internal_id_string = ""
+        for line in docno_to_internal_id_file:
+            doc_no_to_internal_id_string = doc_no_to_internal_id_string +line
+        json_as_string = doc_no_to_internal_id_string.replace("'", "\"")
+        doc_no_to_internal_id = json.loads(json_as_string)
+        # Loading internal id to metadata mapping
+        internal_id_to_meta_data_file_path = read_directory_path+"/"+"internal_id_to_meta_data.txt"
+        internal_id_to_meta_data_file  = open(internal_id_to_meta_data_file_path, "r")
+        internal_id_to_metadata_string = ""
+        for line in internal_id_to_meta_data_file:
+            internal_id_to_metadata_string = internal_id_to_metadata_string + line
+        internal_id_to_metadata = ast.literal_eval(internal_id_to_metadata_string)
+        evaluate_measures(results_dict,qrel_index,doc_no_to_internal_id,internal_id_to_metadata,save_directory_path)
+    except:
+        print("ERROR FOR FILE WRITE METHOD")
+
 except:
     print("error reading results files")
     print(student_tag)
-    print(resul)
-
-'''
-class ResultsParser:
-    class ResultsParseError(Exception):
-        pass
-
-    def __init__(self, filename):
-        self.filename = filename
-
-    def parse(self):
-        global_run_id = None
-        history = set()
-        results = Results()
-        with open(self.filename) as f:
-            for line in f:
-                line_components = line.strip().split()
-                if len(line_components) != 6:
-                    raise ResultsParseError('lines in results file should have exactly 6 columns')
-
-                query_id, _, doc_id, rank, score, run_id = line_components
-                rank = int(rank)
-                score = float(score)
-
-                if global_run_id is None:
-                    global_run_id = run_id
-                elif global_run_id != run_id:
-                    raise ResultsParseError('Mismatching runIDs in results file')
-
-                key = query_id + doc_id
-                if key in history:
-                    raise ResultsParseError('Duplicate query_id, doc_id in results file')
-                history.add(key)
-
-                results.add_result(query_id, Result(doc_id, score, rank))
-
-        return global_run_id, results
-
-
-    class Result:
-        def __init__(self, doc_id, score, rank):
-            self.doc_id = doc_id
-            self.score = score
-            self.rank = rank
-
-        def __lt__(self, x):
-            return (self.score, self.doc_id) > (x.score, x.doc_id)
-
-    class Results:
-        def __init__(self):
-            self.query_2_results = defaultdict(list)
-
-        def add_result(self, query_id, result):
-            self.query_2_results[query_id].append(result)
-
-        def get_result(self, query_id):
-            return self.query_2_results.get(query_id, None)
-
-'''
+    print(result)
 
 t =time.time()
 total = t-a
 print("evaluations.py ran in "+str(total)+" seconds")
-
-
-'''
-import xlwt
-
-x=1
-y=2
-z=3
-
-list1=[2.34,4.346,4.234]
-
-book = xlwt.Workbook(encoding="utf-8")
-
-sheet1 = book.add_sheet("Sheet 1")
-
-sheet1.write(0, 0, "Display")
-sheet1.write(1, 0, "Dominance")
-sheet1.write(2, 0, "Test")
-
-sheet1.write(0, 1, x)
-sheet1.write(1, 1, y)
-sheet1.write(2, 1, z)
-
-sheet1.write(4, 0, "Stimulus Time")
-sheet1.write(4, 1, "Reaction Time")
-
-i=4
-
-for n in list1:
-    i = i+1
-    sheet1.write(i, 0, n)
-
-
-
-book.save("trial.xls")
-
-'''
