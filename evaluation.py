@@ -53,9 +53,29 @@ We need to store the following information:
 results_dict = {} # This holds {student_tag:results_list}
 try:
     for filename in os.listdir(results_files):
+        result_list = []
         if filename.endswith(".results"):
             if(filename=='msmuckerAND.results'):
-                print("GET BACK TO SMUCKER's BOOLEAN AND")
+                try:
+                    results_file = results_files+'/'+filename
+                    with open(results_file) as results_file:
+                        for line in results_file:
+                            line_list = line.strip().split()
+                            if(len(line_list)==6):
+                                try:
+                                    result = results()
+                                    result.student_tag = 'msmuckerAND'
+                                    result.query_id = int(line_list[0])
+                                    result.docno = line_list[2]
+                                    result.rank = line_list[3]
+                                    result.score = line_list[4]
+                                    result_list.append(result)
+                                except:
+                                    print("Error with BooleanAND reading")
+
+                        results_dict['msmuckerAND'] = result_list
+                except:
+                    print("Error with BooleanAND reading")
             else:
                 student_tag = filename[:filename.find(".")]
                 results_file = results_files+'/'+filename

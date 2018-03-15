@@ -12,20 +12,23 @@ def average_precision(results_list,qrel_index):
     average_precision_dict = {}
     topic_ids = list(qrel_index.keys())
     for topic in topic_ids:
-        relevant_docs = list(qrel_index[topic])
-        total_files_returned = 0
-        relevant_files_returned = 0
-        average_precision = 0
-        for result in results_list:
-            if result.query_id == topic:
-                total_files_returned = total_files_returned +1
-                if result.docno in relevant_docs:
-                    relevant_files_returned = relevant_files_returned +1
-                    precision = float(relevant_files_returned)/float(total_files_returned)
-                    average_precision = float(average_precision) + precision
-                    precision = 0
-        average_precision = (1/(float(len(relevant_docs))))*average_precision
-        average_precision_dict[topic] = round(average_precision,4)
+        try:
+            relevant_docs = list(qrel_index[topic])
+            total_files_returned = 0
+            relevant_files_returned = 0
+            average_precision = 0
+            for result in results_list:
+                if result.query_id == topic:
+                    total_files_returned = total_files_returned +1
+                    if result.docno in relevant_docs:
+                        relevant_files_returned = relevant_files_returned +1
+                        precision = float(relevant_files_returned)/float(total_files_returned)
+                        average_precision = float(average_precision) + precision
+                        precision = 0
+            average_precision = (1/(float(len(relevant_docs))))*average_precision
+            average_precision_dict[topic] = round(average_precision,4)
+        except:
+            print("Topic DNE")
     return average_precision_dict
 
 def precision_at_10(results_list,qrel_index):
@@ -33,20 +36,23 @@ def precision_at_10(results_list,qrel_index):
     precision_at_10_dict = {}
     topic_ids = list(qrel_index.keys())
     for topic in topic_ids:
-        relevant_docs = list(qrel_index[topic])
-        total_files_returned = 0
-        relevant_files_returned = 0
-        average_precision = 0
-        for result in results_list:
-            if total_files_returned<10:
-                if result.query_id == topic:
-                    total_files_returned = total_files_returned +1
-                    if result.docno in relevant_docs:
-                        relevant_files_returned = relevant_files_returned +1
-            else:
-                break
-        precision = float(relevant_files_returned)/float(total_files_returned)
-        precision_at_10_dict[topic] = round(precision,4)
+        try:
+            relevant_docs = list(qrel_index[topic])
+            total_files_returned = 0
+            relevant_files_returned = 0
+            average_precision = 0
+            for result in results_list:
+                if total_files_returned<10:
+                    if result.query_id == topic:
+                        total_files_returned = total_files_returned +1
+                        if result.docno in relevant_docs:
+                            relevant_files_returned = relevant_files_returned +1
+                else:
+                    break
+            precision = float(relevant_files_returned)/float(total_files_returned)
+            precision_at_10_dict[topic] = round(precision,4)
+        except:
+            print("Topic DNE")
     return precision_at_10_dict
 
 
@@ -55,54 +61,62 @@ def ndcg_at_10(results_list,qrel_index):
     ndcg_at_10_dict = {}
     topic_ids = list(qrel_index.keys())
     for topic in topic_ids:
-        dcg = 0
-        idcg = 0
-        total_files_returned = 0
-        relevant_files_returned = 0
-        relevant_docs = list(qrel_index[topic])
-        for result in results_list:
-            if total_files_returned < 10:
-                if result.query_id == topic:
-                    total_files_returned = total_files_returned + 1
-                    if total_files_returned < len(relevant_docs):
-                        idcg = idcg + (float(1)/(math.log(total_files_returned+1,2)))
-                    else:
-                        idcg = idcg + (float(1)/(math.log(len(relevant_docs)+1,2)))
-                    if result.docno in relevant_docs:
-                        relevant_files_returned = relevant_files_returned +1
-                        dcg = dcg + (float(1)/(math.log(total_files_returned+1,2)))
-            else:
-                break
-        ndcg = round((float(dcg)/float(idcg)),4)
-        ndcg_at_10_dict[topic] = ndcg
+        try:
+            dcg = 0
+            idcg = 0
+            total_files_returned = 0
+            relevant_files_returned = 0
+            relevant_docs = list(qrel_index[topic])
+            for result in results_list:
+                if total_files_returned < 10:
+                    if result.query_id == topic:
+                        total_files_returned = total_files_returned + 1
+                        if total_files_returned < len(relevant_docs):
+                            idcg = idcg + (float(1)/(math.log(total_files_returned+1,2)))
+                        else:
+                            idcg = idcg + (float(1)/(math.log(len(relevant_docs)+1,2)))
+                        if result.docno in relevant_docs:
+                            relevant_files_returned = relevant_files_returned +1
+                            dcg = dcg + (float(1)/(math.log(total_files_returned+1,2)))
+                else:
+                    break
+            ndcg = round((float(dcg)/float(idcg)),4)
+            ndcg_at_10_dict[topic] = ndcg
+        except:
+            print("Topic DNE")
     return ndcg_at_10_dict
+
 
 def ndcg_at_1000(results_list,qrel_index):
     # thjis method calculated the ndcg at 10
+
     ndcg_at_1000_dict = {}
     topic_ids = list(qrel_index.keys())
     ndcg = 0
     for topic in topic_ids:
-        dcg = 0
-        idcg = 0
-        ndcg = 0
-        total_files_returned = 0
-        relevant_files_returned = 0
-        relevant_docs = list(qrel_index[topic])
-        for result in results_list:
-            if total_files_returned <= 1000:
-                if result.query_id == topic:
-                    total_files_returned = total_files_returned + 1
-                    if total_files_returned <= len(relevant_docs):
-                        idcg = idcg + (float(1)/(math.log(total_files_returned+1,2)))
-                    if result.docno in relevant_docs:
-                        relevant_files_returned = relevant_files_returned +1
-                        dcg = dcg + (float(1)/(math.log(total_files_returned+1,2)))
-        if idcg == 0:
+        try:
+            dcg = 0
+            idcg = 0
             ndcg = 0
-        else:
-            ndcg = round((float(dcg)/float(idcg)),4)
-        ndcg_at_1000_dict[topic] = ndcg
+            total_files_returned = 0
+            relevant_files_returned = 0
+            relevant_docs = list(qrel_index[topic])
+            for result in results_list:
+                if total_files_returned <= 1000:
+                    if result.query_id == topic:
+                        total_files_returned = total_files_returned + 1
+                        if total_files_returned <= len(relevant_docs):
+                            idcg = idcg + (float(1)/(math.log(total_files_returned+1,2)))
+                        if result.docno in relevant_docs:
+                            relevant_files_returned = relevant_files_returned +1
+                            dcg = dcg + (float(1)/(math.log(total_files_returned+1,2)))
+            if idcg == 0:
+                ndcg = 0
+            else:
+                ndcg = round((float(dcg)/float(idcg)),4)
+            ndcg_at_1000_dict[topic] = ndcg
+        except:
+            print("Topic DNE")
     return ndcg_at_1000_dict
 
 
@@ -127,36 +141,39 @@ def time_based_gain(results_list,qrel_index,docno_to_internal_id,internal_id_to_
     time_based_gain_dict = {}
     topic_ids = list(qrel_index.keys())
     for topic in topic_ids:
-        relevant_docs = list(qrel_index[topic])
-        time_based_gain_value = 0
-        discount_factor = 0
-        time_factor = 0
-        gain_factor = 0
-        relevant_files_returned = 0
+        try:
+            relevant_docs = list(qrel_index[topic])
+            time_based_gain_value = 0
+            discount_factor = 0
+            time_factor = 0
+            gain_factor = 0
+            relevant_files_returned = 0
 
-        for i in range(0,len(results_list)):
-            result = results_list[i]
-            doc_time = 0
-            if result.query_id == topic:
-                if i>0:
-                    prev_result = results_list[i-1]
-                    doc_time = doc_time_function(prev_result.docno,docno_to_internal_id,internal_id_to_metadata)
+            for i in range(0,len(results_list)):
+                result = results_list[i]
+                doc_time = 0
+                if result.query_id == topic:
+                    if i>0:
+                        prev_result = results_list[i-1]
+                        doc_time = doc_time_function(prev_result.docno,docno_to_internal_id,internal_id_to_metadata)
 
-                    if prev_result.docno in relevant_docs:
-                        time_factor = time_factor + time_to_evaluate_summary + (doc_time*probability_click_given_relevant)
+                        if prev_result.docno in relevant_docs:
+                            time_factor = time_factor + time_to_evaluate_summary + (doc_time*probability_click_given_relevant)
+                        else:
+                            time_factor = time_factor + time_to_evaluate_summary + (doc_time*probability_click_given_nonrelevant)
+
+                        if result.docno in relevant_docs:
+                            gain_factor = 1*(probability_click_given_relevant*probability_save_given_relevant)
+                        else:
+                            gain_factor = 0*probability_save_given_nonrelevant*probability_save_given_nonrelevant
                     else:
-                        time_factor = time_factor + time_to_evaluate_summary + (doc_time*probability_click_given_nonrelevant)
-
-                    if result.docno in relevant_docs:
-                        gain_factor = 1*(probability_click_given_relevant*probability_save_given_relevant)
-                    else:
-                        gain_factor = 0*probability_save_given_nonrelevant*probability_save_given_nonrelevant
-                else:
-                    time_factor = 0
-                discount_factor = math.exp(float(-1)*float(time_factor)*math.log(2)*(float(1/224)))
-                time_based_gain_value =  time_based_gain_value + (gain_factor*discount_factor)
-                discount_factor = 0
-        time_based_gain_dict[topic] = time_based_gain_value
+                        time_factor = 0
+                    discount_factor = math.exp(float(-1)*float(time_factor)*math.log(2)*(float(1/224)))
+                    time_based_gain_value =  time_based_gain_value + (gain_factor*discount_factor)
+                    discount_factor = 0
+            time_based_gain_dict[topic] = time_based_gain_value
+        except:
+            print("Topic DNE")
     return time_based_gain_dict
 
 def save_student_data(student, average_precision_dict, precision_at_10_dict, ndcg_at_10_dict, ndcg_at_1000_dict, time_based_gain_dict,read_directory_path):
@@ -248,6 +265,7 @@ def evaluate_measures(results_dict,qrel_index,docno_to_internal_id,internal_id_t
     averages_dict = {} # Student:[mean results]
     for student in student_tags:
         try:
+            print(student)
             results_list = results_dict[student]
             average_precision_dict = average_precision(results_list,qrel_index)
             precision_at_10_dict = precision_at_10(results_list,qrel_index)
