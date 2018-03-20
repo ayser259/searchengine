@@ -1,7 +1,8 @@
 # This file holds all the helper methods for the 'gzip_reader_methods.py' file
 import gzip, re, sys, os,json
 from objects import *
-import lexicon_engine as lexicon_engine
+import porter_stemmer_lexicon_engine as lexicon_engine
+from nltk.stem import PorterStemmer
 
 def gzip_reader_error():
     print("There has been an error with your request")

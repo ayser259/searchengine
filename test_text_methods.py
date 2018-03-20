@@ -14,6 +14,17 @@ def gzip_reader_error():
     print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test")
     sys.exit()
 
+def json_save(save_dict,filename):
+    file_n = json.dumps(save_dict)
+    f = open(filename,"w")
+    f.write(file_n)
+    f.close()
+
+def json_read(filepath):
+    return_dict = {}
+    data = json.load(open(filepath))
+    return return_dict
+
 def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
     month = docno[2:4]
@@ -89,6 +100,7 @@ def save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path):
     current_file.write(str(internal_id_to_meta_data))
     current_file.close()
 
+
 def save_meta_data(meta_data_list,save_directory_path):
     # This method is used to sasve the internal id to metadata mapping
     if (os.path.exists(save_directory_path)) == False:
@@ -99,21 +111,25 @@ def save_meta_data(meta_data_list,save_directory_path):
         current_file.write(str(item))
     current_file.close()
 
+def save_collection_info(average_word_count,doc_counter,save_directory_path):
+    # This method is used to save collection information
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+    file_path = os.path.join(save_directory_path, "collection_info" + ".txt")
+    current_file = open(file_path, "w")
+    current_file.write(str(average_word_count)+"_"+str(doc_counter))
+    current_file.close()
+
+
+
 def read_gzip_file(gzip_file_path,save_directory_path):
     #This method reads through the gzip file, and searches for doc tags
     # 'doc_counter is used to keep track of how many documents are saved'
     doc_counter = 0
+# Assignment_4_start_a
+    average_word_count = 0
+# Assignment_4_start_b
     #opening the .gz file and reading it line by line
-# Assignment_2_start_a
-    # This string is used to store tokenizable string, not full document
-    token_string = ""
-    # This boolean value keeps track of whether or not we are reading valid tokens
-    is_token_tag = False
-    # This dictionary is part_1 of lexicon: token --> token_ids
-    tokens_to_id = {}
-    # This dictionary is the inverted index
-    inverted_index = {}
-# Assignment_2_end_a
     with open(gzip_file_path, "r") as gz_file:
         #This variable will store the current document
         current_doc = ""
@@ -138,19 +154,17 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         tokens_to_id = {}
         # This dictionary is the inverted index
         inverted_index = {}
-
 # Assignment_2_end_a
         for line in gz_file:
 
 # Assignment_2_start_b
-
+# The following code is used to extract the part of the document that should be within the tokens
             if (line[0:6] =='<TEXT>') or (line[0:10] =='<HEADLINE>') or (line[0:0] =='<GRAPHIC>'):
                 is_token_tag = True
             elif line[0:7] =='</TEXT>' or line[0:11] =='</HEADLINE>' or (line[0:10] =='</GRAPHIC>'):
                 is_token_tag = False
             if is_token_tag == True:
                 token_string = lexicon_engine.token_string_maker(line,token_string)
-
 # Assignment_2_end_b
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
             if line[0:5]=='<DOC>':
@@ -185,12 +199,14 @@ def read_gzip_file(gzip_file_path,save_directory_path):
             # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
 # Assignment_2_start_c
-
+                # the following code calls on the lexicon_engine to create the lexion and inverted_index
+                is_token_tag = False
                 tokens = lexicon_engine.tokenize(current_doc)
                 token_ids = lexicon_engine.convert_tokens_to_ids(tokens,tokens_to_id)
                 word_count = lexicon_engine.count_words(token_ids)
                 lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
                 current_doc_meta_data.doc_length = len(token_ids)
+                average_word_count = average_word_count + len(token_ids)
 
 # Assignment_2_end_c
                 docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
@@ -198,17 +214,20 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 save_doc(current_doc,current_doc_meta_data,save_directory_path)
                 metadata_list.append(current_doc_meta_data)
                 current_doc = ""
+                token_string = ""
+                tokens = ""
+                token_ids =""
         # Saving dictionaries and metadata to file
 # Assignment_2_start_d
-
+        # The following code calls on the lexicon_engine to write the dictionaries to the disk
         id_to_tokens = lexicon_engine.convert_ids_to_tokens(tokens_to_id)
         lexicon_engine.save_tokens_to_id(tokens_to_id,save_directory_path)
         lexicon_engine.save_id_to_tokens(id_to_tokens,save_directory_path)
         lexicon_engine.save_inverted_index(inverted_index,save_directory_path)
-
 # Assignment_2_end_d
         save_docno_to_internal_id(docno_to_internal_id,save_directory_path)
         save_internal_id_to_metadata(internal_id_to_metadata,save_directory_path)
         save_meta_data(metadata_list,save_directory_path)
+        average_word_count = float(average_word_count)/float(doc_counter)
+        save_collection_info(average_word_count,doc_counter,save_directory_path)
         print(str(doc_counter)+" documents located, processed, and saved.")
-        print(doc_counter)

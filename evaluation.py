@@ -19,6 +19,7 @@ qrels_file = input_list[1]
 results_files = input_list[2]
 save_directory_path = input_list[3]
 read_directory_path = input_list[4]
+print(read_directory_path)
 
 # This portion of the code stores the qrels files as a dictionary with lists of relvancy
 # we only need to keep track of the relvant documents, if not in dict, not relevant
@@ -44,6 +45,7 @@ try:
     qrels_file.close()
 except:
     print("Error Reading Qrels File")
+
 # Next we need to iterate through the results files
 # The following code is adapted from code provided by Prof. Smucker
 '''

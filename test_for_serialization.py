@@ -1,7 +1,14 @@
 # This file holds all the helper methods for the 'gzip_reader_methods.py' file
-import gzip, re, sys, os,json
+import gzip, re, sys, os,json, time, ast
 from objects import *
 import lexicon_engine as lexicon_engine
+
+def save_inverted_index_json(inverted_index,save_directory_path):
+    # This method saves the inverted index to file
+    if (os.path.exists(save_directory_path)) == False:
+        os.makedirs(save_directory_path)
+    save_directory_path = save_directory_path+"inverted_index.json"
+    json_save(inverted_index,save_directory_path)
 
 def gzip_reader_error():
     print("There has been an error with your request")
@@ -13,17 +20,6 @@ def gzip_reader_error():
     print("2. The destination directory shoudl not exist and should be provided in the following format, such that the folder 'test' does not exist:")
     print("Users/ayser/Dropbox/Waterloo/3A/Courses/Course_Projects/msci_541/test")
     sys.exit()
-
-def json_save(save_dict,filename):
-    file_n = json.dumps(save_dict)
-    f = open(filename,"w")
-    f.write(file_n)
-    f.close()
-
-def json_read(filepath):
-    return_dict = {}
-    data = json.load(open(filepath))
-    return return_dict
 
 def convert_docno_to_date(docno):
     # This method convers a docno to its relevant date
@@ -91,6 +87,7 @@ def save_docno_to_internal_id(doc_no_to_internal_id,save_directory_path):
     current_file.write(str(doc_no_to_internal_id))
     current_file.close()
 
+
 def save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path):
     # This method is used to sasve the internal id to metadata mapping
     if (os.path.exists(save_directory_path)) == False:
@@ -99,7 +96,6 @@ def save_internal_id_to_metadata(internal_id_to_meta_data,save_directory_path):
     current_file = open(file_path, "w")
     current_file.write(str(internal_id_to_meta_data))
     current_file.close()
-
 
 def save_meta_data(meta_data_list,save_directory_path):
     # This method is used to sasve the internal id to metadata mapping
@@ -119,8 +115,6 @@ def save_collection_info(average_word_count,doc_counter,save_directory_path):
     current_file = open(file_path, "w")
     current_file.write(str(average_word_count)+"_"+str(doc_counter))
     current_file.close()
-
-
 
 def read_gzip_file(gzip_file_path,save_directory_path):
     #This method reads through the gzip file, and searches for doc tags
@@ -231,3 +225,86 @@ def read_gzip_file(gzip_file_path,save_directory_path):
         average_word_count = float(average_word_count)/float(doc_counter)
         save_collection_info(average_word_count,doc_counter,save_directory_path)
         print(str(doc_counter)+" documents located, processed, and saved.")
+
+
+print("Start Saving Run")
+
+
+print("Starting Serialization Read")
+
+a = time.time()
+# Reading arguments presented from input
+input_list = sys.argv
+gzip_file_path = input_list[2]
+read_directory_path = input_list[1]
+
+print(read_directory_path)
+if (os.path.exists(read_directory_path))==False:
+    os.makedirs(read_directory_path)
+
+read_gzip_file(gzip_file_path,read_directory_path)
+
+print("Starting to read")
+
+# Loading the intenal_id to metadatafile
+b= time.time()
+internal_id_to_meta_data_file_path = read_directory_path+"/"+"internal_id_to_meta_data.txt"
+internal_id_to_meta_data_file  = open(internal_id_to_meta_data_file_path, "r")
+internal_id_to_metadata_string = ""
+for line in internal_id_to_meta_data_file:
+    internal_id_to_metadata_string = internal_id_to_metadata_string + line
+internal_id_to_metadata = ast.literal_eval(internal_id_to_metadata_string)
+t = time.time()
+total = t-b
+print("internal_id_to_metadata complete in "+str(total)+" seconds")
+
+# Loading the inverted index
+b= time.time()
+inverted_index = lexicon_engine.read_inverted_index(read_directory_path)
+t = time.time()
+total = t-b
+print("inverted_index loaded in "+str(total)+" seconds")
+
+
+# Loading tokens_to_id dictionary
+b= time.time()
+tokens_to_id = lexicon_engine.read_tokens_to_id(read_directory_path)
+t = time.time()
+total = t-b
+print("tokens_to_id loaded in"+str(total)+ 'Seconds')
+t =time.time()
+total = t-a
+
+print("Serialzation Test Completed in "+str(total)+" seconds")
+
+
+
+
+
+
+
+
+"""
+Try methods:
+
+
+
+If you want to save a dictionary to a json file
+
+
+method #2
+
+dict = {'Python' : '.py', 'C++' : '.cpp', 'Java' : '.java'}
+f = open("dict.txt","w")
+f.write( str(dict) )
+f.close()
+save dictionary to a pickle file (.pkl)
+
+The pickle module may be used to save dictionaries (or other objects) to a file. The module can serialize and deserialize Python objects.
+# Method #3
+import pickle
+dict = {'Python' : '.py', 'C++' : '.cpp', 'Java' : '.java'}
+f = open("file.pkl","wb")
+pickle.dump(dict,f)
+f.close()
+"""

@@ -1,4 +1,4 @@
-# This method holds all the helper methods for assignment 2, pertaining to in-memory inverstion
+from nltk.stem import PorterStemmer
 import os,json,ast,re
 
 def json_save(save_dict,filename):
@@ -21,6 +21,7 @@ def token_string_maker(line,token_string):
 def tokenize(doc_string):
     # This method tokenizes the document string and returns a list of all the tokens
     tokens = []
+    stemmer = PorterStemmer()
     start = 0
     index = -1
     doc_string= doc_string.lower()
@@ -30,6 +31,7 @@ def tokenize(doc_string):
         if (current_term.isalnum() == False):
             if (start!= index):
                 token = doc_string[start:index]
+                token = stemmer.stem(token)
                 tokens.append(token)
             start = index + 1
     if(start!=index):

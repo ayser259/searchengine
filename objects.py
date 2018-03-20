@@ -7,6 +7,7 @@ class metadata:
     headline = -1
     doc_length = -1
 
+
     def __str__(self):
         return '<'+'internal_id'+str(self.internal_id) + 'docno'+str(self.docno) +'date'+str(self.date)+'headline'+str(self.headline)+'doc_length'+str(self.doc_length)+'>'
 
@@ -40,6 +41,7 @@ class results:
     docno = ""
     rank = -1
     score = -1
+    internal_id = -1
 
     def __str__(self):
         return "< student_tag: "+self.student_tag +' query_id: '+ str(self.query_id)+ " docno: "+self.docno + " score: " + str(self.score) +" rank: "+str(self.rank) + ">"
