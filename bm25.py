@@ -159,65 +159,6 @@ def bm25(directory,query_dict,k1,k2,b,output_filename):
     print("Finished in "+str(total)+" seconds")
     print("BM25 Complete")
 
-
-
-
-
-'''
-    for query in query_list:
-        doc_id_to_bm25_score = query_ranked_dict[query]
-        doc_ids = list(doc_id_to_bm25_score.keys())
-        ranked_result_list = []
-
-        for doc_id in doc_ids:
-            current_score = doc_id_to_bm25_score[doc_id]
-            current_result = results()
-            current_result.score = current_score
-            current_result.docno = internal_id_to_docno[int(doc_id)]
-            current_result.query_id = query
-            current_result.student_tag = "bm25"
-            current_result.rank = len(ranked_result_list) +1
-
-            ranked_result_list.append(current_result)
-
-            position = len(ranked_result_list) -1
-
-            if(len(ranked_result_list)>1):
-                while position>0 and (ranked_result_list[position-1]).score < current_score:
-                    ranked_result_list[position].rank = ranked_result_list[position].rank +1
-                    ranked_result_list[position] = ranked_result_list[position-1]
-                    position = position - 1
-
-            ranked_result_list[position] = current_result
-
-        try:
-            ranked_result_list = ranked_result_list[:1000]
-        except:
-            z=1
-
-        query_ranked_dict[query] = ranked_result_list
-        t =time.time()
-        total = t-c
-        c = time.time()
-        print("Ranking for "+str(query)+" in "+str(total)+" seconds")
-
-    # Now write to file
-    write_string = ""
-    for query in query_list:
-        ranked_list = list(query_ranked_dict[query])
-        for result in ranked_list:
-            write_string = write_string + str(query)+" "+"q0 "+str(result.docno)+" "+str(result.rank)+" "+str(result.score)+" bm25"+'\n'
-
-    output_path = directory+"/"+"bm25_results_file.txt"
-    current_file = open(output_path,"w")
-    current_file.write(write_string)
-
-    t =time.time()
-    total = t-a
-
-
-    print("BM25 Complete")
-'''
 #Program starts here
 print("Running bm25.py")
 
