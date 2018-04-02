@@ -10,29 +10,15 @@ def top_3_lines(directory,current_file_meta_data,query_list):
     is_token_tag = False
     current_doc = ""
     current_doc_string = ""
-    for line in current_file:
-        token_string = ""
-# The following code is used to extract the part of the document that should be within the tokens
-        if (line[0:6] =='<TEXT>') or (line[0:10] =='<HEADLINE>') or (line[0:0] =='<GRAPHIC>'):
-            is_token_tag = True
-        elif line[0:7] =='</TEXT>' or line[0:11] =='</HEADLINE>' or (line[0:10] =='</GRAPHIC>'):
-            is_token_tag = False
-        if is_token_tag == True:
-            token_string = lexicon_engine.token_string_maker(line,token_string)
-        # Storing all the relevant lines for a document within a variable
-        current_doc = current_doc + token_string
-        current_doc_string = current_doc_string + token_string
-        # Saving singular document after encountering the end document tag
-        if line[0:6]=='</DOC>':
-            current_doc = re.split('(?<=[.!?]) +',current_doc)
 
-    for line in current_doc:
+    for line in current_file:
         line_list = list(line.split())
         score = 0
-        for item in query_list:
-            if item in line_list:
-                score = score+ 1
+        for word in line_list:
+            if word in query_list:
+                score = score + 1
         line_to_score[line] = score
+        score = 0
 
     sorted_line_to_score = sorted(line_to_score,key=line_to_score.get,reverse=True)
     sorted_line_to_score = list(sorted_line_to_score[:3])

@@ -165,6 +165,10 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 is_token_tag = False
             if is_token_tag == True:
                 token_string = lexicon_engine.token_string_maker(line,token_string)
+                # Storing all the relevant lines for a document within a variable
+                current_doc = current_doc + token_string
+                token_string = ""
+
 # Assignment_2_end_b
             # If a <DOC> tag is detected,internal_id,new meta data are initialized
             if line[0:5]=='<DOC>':
@@ -194,8 +198,7 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 is_headline = False
                 current_doc_meta_data.headline = str(extract_headline(headline))
                 headline = ""
-            # Storing all the relevant lines for a document within a variable
-            current_doc = current_doc + line
+
             # Saving singular document after encountering the end document tag
             if line[0:6]=='</DOC>':
 # Assignment_2_start_c
@@ -207,7 +210,6 @@ def read_gzip_file(gzip_file_path,save_directory_path):
                 lexicon_engine.add_to_postings(word_count,current_doc_internal_id,inverted_index)
                 current_doc_meta_data.doc_length = len(token_ids)
                 average_word_count = average_word_count + len(token_ids)
-
 # Assignment_2_end_c
                 docno_to_internal_id.update({current_doc_meta_data.docno:current_doc_meta_data.internal_id})
                 internal_id_to_metadata.update({current_doc_meta_data.internal_id:str(current_doc_meta_data)})

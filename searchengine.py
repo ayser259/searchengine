@@ -13,12 +13,12 @@ def bm25_top_10(doc_no_to_internal_id,internal_id_to_metadata,inverted_index,tok
     query = re.sub(r'\W+', ' ', query)
     query_list =  query.split()
 
-    # Perform bm25 retrieval on query
-    doc_id_to_bm25_score = {}
     k1 = 1.2
     k2 = 7
     b = 0.75
-
+    doc_id_to_bm25_score = {}
+    bm25_score = 0
+    sorted_doc_id_to_bm25_score_keys = []
     for term in query_list:
         try:
             term_id = int(tokens_to_id[term])
@@ -44,10 +44,11 @@ def bm25_top_10(doc_no_to_internal_id,internal_id_to_metadata,inverted_index,tok
             bm25_score = 0
 
     sorted_doc_id_to_bm25_score_keys = sorted(doc_id_to_bm25_score,key=doc_id_to_bm25_score.get,reverse=True)
-    sorted_doc_id_to_bm25_score_keys = list(sorted_doc_id_to_bm25_score_keys[:10]) # Top 10 doc list
+    sorted_doc_id_to_bm25_score_keys = list(sorted_doc_id_to_bm25_score_keys[:10])
 
     rank_to_docno = {} # {rank:docno}
     rank_counter = 0
+
     for doc_id in sorted_doc_id_to_bm25_score_keys:
         rank_counter +=1
         docno = internal_id_to_docno[int(doc_id)]
@@ -63,10 +64,10 @@ def bm25_top_10(doc_no_to_internal_id,internal_id_to_metadata,inverted_index,tok
         snippet = top_3_lines(directory,current_file_meta_data,query_list)
         print(snippet)
         print()
-
     t = time.time()
     total = t - c
     print("Retrieval performed in "+str(total)+" seconds")
+
     return rank_to_docno
 
 def read_doc(rank_to_docno,rank,doc_no_to_internal_id,internal_id_to_metadata,directory):
@@ -153,13 +154,12 @@ try:
                 rank_to_docno = bm25_top_10(doc_no_to_internal_id,internal_id_to_metadata,inverted_index,tokens_to_id)
             elif command =="Q":
                 exit = True
-                sys.exit()
             elif int(command) in query_list:
                 read_doc(rank_to_docno,int(command),doc_no_to_internal_id,internal_id_to_metadata,directory)
                 print()
             else:
-                print("Input incorrectly formatted, try again")
+                print("Error 2: Input incorrectly formatted, try again")
         except:
-            print("Input incorrectly formatted, try again")
+            print("Error 3: Input incorrectly formatted, try again")
 except:
     print("Error 1")
